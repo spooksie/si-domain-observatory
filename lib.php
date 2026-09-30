@@ -49,17 +49,28 @@ function checkNeoserv(array $domains): array {
     updateStore(function($data)use($results){$index=array_column($results,null,'domain');foreach($data as &$row)if(isset($index[$row['domain']]))$row=array_merge($row,$index[$row['domain']]);unset($row);return $data;});
     return $results;
 }
-function checkDomains(array $domains): array {
+function checkDomains(array $domains, bool $sequential=false, bool $commandLine=false): array {
     $url='https://dac.domenca.com/portal/en_US/new-shopping-cart/get-domain-availability-info';
     $multi=curl_multi_init();$handles=[];
     foreach(array_chunk($domains,8) as $chunk){
         $fields=['defaultDomain'=>$chunk[0]];foreach($chunk as $i=>$domain)$fields['domains['.$i.']']=$domain;
         $ch=curl_init($url);curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_POST=>true,CURLOPT_POSTFIELDS=>http_build_query($fields),CURLOPT_CONNECTTIMEOUT=>8,CURLOPT_TIMEOUT=>30,CURLOPT_HTTPHEADER=>['Accept: application/json'],CURLOPT_USERAGENT=>'siDomains-personal-shortlist/1.0']);
-        $handles[]=['handle'=>$ch,'domains'=>$chunk];curl_multi_add_handle($multi,$ch);
+        $handles[]=['handle'=>$ch,'domains'=>$chunk,'fields'=>$fields];if(!$sequential&&!$commandLine)curl_multi_add_handle($multi,$ch);
     }
-    do{curl_multi_exec($multi,$running);if($running)curl_multi_select($multi,1);}while($running);
+    if(!$sequential&&!$commandLine){do{curl_multi_exec($multi,$running);if($running)curl_multi_select($multi,1);}while($running);}
     $replies=[];
-    foreach($handles as $entry){$ch=$entry['handle'];$decoded=json_decode(curl_multi_getcontent($ch)?:'',true);foreach($entry['domains'] as $domain)$replies[$domain]=['data'=>$decoded,'http'=>curl_getinfo($ch,CURLINFO_RESPONSE_CODE),'error'=>curl_error($ch)];curl_multi_remove_handle($multi,$ch);curl_close($ch);}
+    foreach($handles as $entry){$ch=$entry['handle'];
+        if($commandLine){
+            // Use the system curl transport for the long-running serial scanner.
+            $args=['curl','--silent','--show-error','--connect-timeout','8','--max-time','30','--header','Accept: application/json','--user-agent','siDomains-personal-shortlist/1.0','--data',http_build_query($entry['fields']),'--write-out',"\n%{http_code}",$url];
+            $process=proc_open($args,[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes);
+            if(!is_resource($process))throw new RuntimeException('Could not start registrar request');
+            fclose($pipes[0]);$output=stream_get_contents($pipes[1]);fclose($pipes[1]);$error=trim(stream_get_contents($pipes[2]));fclose($pipes[2]);proc_close($process);
+            $split=strrpos($output,"\n");$http=$split===false?0:(int)substr($output,$split+1);$raw=$split===false?$output:substr($output,0,$split);
+        }else{$raw=$sequential?curl_exec($ch):curl_multi_getcontent($ch);$http=curl_getinfo($ch,CURLINFO_RESPONSE_CODE);$error=curl_error($ch);}
+        $decoded=json_decode($raw?:'',true);foreach($entry['domains'] as $domain)$replies[$domain]=['data'=>$decoded,'http'=>$http,'error'=>$error];
+        if(!$sequential&&!$commandLine)curl_multi_remove_handle($multi,$ch);curl_close($ch);
+    }
     curl_multi_close($multi);$results=[];
     foreach($domains as $domain){
         $decoded=$replies[$domain]['data'];$http=$replies[$domain]['http'];$error=$replies[$domain]['error'];
