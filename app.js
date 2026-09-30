@@ -1,7 +1,9 @@
 'use strict';
 const $ = s => document.querySelector(s);
-let rows=[], filter='all',page=1,checking=false,stop=false;
+let rows=[], filter='available',page=1,checking=false,stop=false;
 const perPage=60;
+const selectedThemes=new Set();
+let themesInitialized=false;
 let initialCategory=new URLSearchParams(window.location.search).get('category')||'';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const hosted=document.documentElement.dataset.storage==='browser';
@@ -15,7 +17,7 @@ async function post(body){if(hosted){const state=personal();if(body.action==='sa
 async function load(){try{const r=await fetch(hosted?'domains.json':'api.php',{cache:'no-store'});if(!r.ok)throw new Error('Could not load domains');const data=await r.json();rows=hosted?data:data.domains;if(hosted){const state=personal();rows=rows.concat(state.added.filter(a=>!rows.some(r=>r.domain===a.domain))).map(r=>({...r,...state.flags[r.domain]}));}render();}catch(e){toast(e.message);}}
 function filtered(){let data=rows.filter(r=>{
  const q=$('#search').value.trim().toLowerCase();if(q&&!`${r.domain} ${r.idea||''} ${r.category}`.toLowerCase().includes(q))return false;
- if($('#category').value&&r.category!==$('#category').value)return false;
+ if(selectedThemes.size&&!selectedThemes.has(r.category))return false;
  if($('#hide-bought').checked&&r.bought)return false;
  return filter==='all'||(filter==='ai'?r.ai&&r.status==='available':filter==='favorites'?r.favorite:filter==='bought'?r.bought:r.status===filter);
 });
@@ -25,15 +27,30 @@ function rowHTML(r){const d=escape(r.domain),status=escape(r.status),label=({ava
 function render(){
  const available=rows.filter(r=>r.status==='available');$('#count-all').textContent=rows.length.toLocaleString();$('#count-available').textContent=available.length.toLocaleString();$('#tab-available').textContent=available.length;$('#count-ai').textContent=available.filter(r=>r.ai).length;$('#count-bought').textContent=rows.filter(r=>r.bought).length;
  const checked=rows.filter(r=>r.status!=='unchecked').length;$('#progress').value=100*checked/Math.max(rows.length,1);if(!checking)$('#progress-text').textContent=`${checked.toLocaleString()} / ${rows.length.toLocaleString()} explored · ${hosted?'dated registrar snapshot':'saved results refresh every 3 seconds'}`;
- const categories=[...new Set(rows.map(r=>r.category))];if($('#category').options.length!==categories.length+1){const chosen=$('#category').value || (categories.includes(initialCategory)?initialCategory:'');initialCategory='';$('#category').innerHTML='<option value="">All themes</option>'+categories.map(c=>`<option>${escape(c)}</option>`).join('');$('#category').value=chosen;}
+ renderThemes(available);
+
  const data=filtered();const pages=Math.max(1,Math.ceil(data.length/perPage));page=Math.min(page,pages);const start=(page-1)*perPage;$('#domains').innerHTML=data.slice(start,start+perPage).map(rowHTML).join('');$('#empty').hidden=!!data.length;$('#result-count').textContent=`${data.length.toLocaleString()} matching names${data.length?` · showing ${start+1}–${Math.min(start+perPage,data.length)}`:''}`;$('#page-label').textContent=`Page ${page} of ${pages}`;$('#prev').disabled=page<=1;$('#next').disabled=page>=pages;
 }
+function renderThemes(available){
+ const categories=[...new Set(rows.map(r=>r.category))];
+ if(!themesInitialized){if(categories.includes(initialCategory))selectedThemes.add(initialCategory);themesInitialized=true;}
+ const counts=new Map(categories.map(c=>[c,available.filter(r=>r.category===c).length]));
+ const showCounts=$('#show-theme-counts').checked;
+ const icons={'AI & intelligence':'✦','Science & space':'✧','Brandable dictionary words':'Aa','Build & infrastructure':'▦','Rare dictionary words':'◇','Modern service names':'⚡','Names & nicknames':'☺','Domain hacks':'↗','Your names':'★'};
+ $('#theme-buttons').innerHTML=`<button type="button" class="theme-chip all-themes ${selectedThemes.size?'':'selected'}" data-theme="" aria-pressed="${!selectedThemes.size}">All themes${showCounts?`<span class="theme-count">${available.length}</span>`:''}</button>`+categories.map(c=>`<button type="button" class="theme-chip ${selectedThemes.has(c)?'selected':''}" data-theme="${escape(c)}" aria-pressed="${selectedThemes.has(c)}"><span class="theme-icon" aria-hidden="true">${icons[c]||'◇'}</span>${escape(c)}${showCounts?`<span class="theme-count">${counts.get(c)}</span>`:''}</button>`).join('');
+ $('#category').innerHTML='<option value="">All themes'+(showCounts?` · ${available.length} available`:'')+'</option>'+categories.map(c=>`<option value="${escape(c)}">${escape(c)}${showCounts?` · ${counts.get(c)} available`:''}</option>`).join('')+(selectedThemes.size>1?`<option value="__multiple">${selectedThemes.size} themes selected</option>`:'');
+ $('#category').value=selectedThemes.size>1?'__multiple':([...selectedThemes][0]||'');
+ $('#theme-selection').textContent=selectedThemes.size?`${selectedThemes.size} theme${selectedThemes.size===1?'':'s'} selected · tap again to remove`:'All themes included · tap buttons to mix your favourites';
+}
+$('#theme-buttons').addEventListener('click',e=>{const button=e.target.closest('[data-theme]');if(!button)return;const theme=button.dataset.theme;if(!theme)selectedThemes.clear();else if(selectedThemes.has(theme))selectedThemes.delete(theme);else selectedThemes.add(theme);page=1;render();});
+$('#show-theme-counts').addEventListener('change',render);
+$('#category').addEventListener('change',()=>{const value=$('#category').value;if(value==='__multiple')return;selectedThemes.clear();if(value)selectedThemes.add(value);page=1;render();});
 async function check(domains){if(hosted){toast('Open Neoserv or Domenca for a fresh availability check.');return;}if(checking)return;checking=true;stop=false;$('#stop-check').hidden=false;$('#check-visible').disabled=true;let done=0;try{for(let i=0;i<domains.length&&!stop;i+=3){$('#progress-text').textContent=`Rechecking ${done} / ${domains.length}…`;let result;let retries=0;while(true){try{result=await post({action:'check',domains:domains.slice(i,i+3)});break;}catch(e){if(e.message.includes('already running')&&retries++<10){await new Promise(r=>setTimeout(r,2000));if(stop)break;continue;}throw e;}}if(!result)break;for(const r of result.results){const row=rows.find(x=>x.domain===r.domain);if(row)Object.assign(row,r);}done+=result.results.length;render();if(result.results.some(r=>r.http_status===429))throw new Error('Registrar rate limit reached. Wait before trying again.');await new Promise(r=>setTimeout(r,700));}toast(`Updated ${done} domain${done===1?'':'s'}.`);}catch(e){toast(e.message);}finally{checking=false;$('#stop-check').hidden=true;$('#check-visible').disabled=false;await load();}}
 $('#domains').addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el)return;const domain=el.closest('tr').dataset.domain;const row=rows.find(r=>r.domain===domain);const action=el.dataset.action;
  if(action==='check'){await check([domain]);return;}
  if(action==='favorite'||action==='bought'){const key=action==='favorite'?'favorite':'bought',value=action==='favorite'?!row.favorite:el.checked;el.disabled=true;try{await post({action:'save',domain,[key]:value});row[key]=value;$('#save-message').textContent=`Saved ${domain} ${hosted?'in this browser':'to this folder'}`;render();}catch(e){toast(e.message);render();}}
 });
-for(const id of ['search','category','sort','hide-bought'])$('#'+id).addEventListener(id==='search'?'input':'change',()=>{page=1;render();});
+for(const id of ['search','sort','hide-bought'])$('#'+id).addEventListener(id==='search'?'input':'change',()=>{page=1;render();});
 $('.filters').addEventListener('click',e=>{const button=e.target.closest('[data-filter]');if(!button)return;filter=button.dataset.filter;page=1;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===button));render();});
 $('#prev').onclick=()=>{page--;render();};$('#next').onclick=()=>{page++;render();};
 $('#check-visible').onclick=()=>check(filtered().slice((page-1)*perPage,page*perPage).map(r=>r.domain));$('#stop-check').onclick=()=>{stop=true;};

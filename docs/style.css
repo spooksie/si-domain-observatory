@@ -15,3 +15,21 @@ body{background-image:radial-gradient(ellipse at 85% 8%,#d8ebf455,transparent 45
 .footer-brand{font-size:12px;color:#14161a}
 .footer-brand a{color:#0f6f92;font-weight:600}
 @media(max-width:800px){header{flex-wrap:wrap;height:auto;min-height:90px;padding:17px 0;gap:12px}.logo img{width:160px}.brand{margin-right:auto}.site-link{margin-left:0;font-size:11px}.download{margin-left:auto;font-size:10px}}
+
+.theme-picker{margin-top:18px;padding:18px;background:#faf8f399;border:1px solid var(--line);border-radius:14px}
+.theme-picker-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}
+.theme-heading{font:700 13px 'Manrope',sans-serif;display:block;margin-bottom:4px}
+#theme-selection{font-size:10px;color:var(--muted)}
+.counts-toggle{font-size:11px;display:flex;align-items:center;gap:7px;white-space:nowrap;color:var(--muted)}
+.counts-toggle input{accent-color:var(--orange);width:15px;height:15px}
+.theme-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.theme-chip{display:flex;align-items:center;gap:8px;border-radius:30px;padding:9px 12px;background:#fff9;font-size:11px;transition:background .15s,transform .15s,box-shadow .15s}
+.theme-chip:hover{transform:translateY(-2px);background:#d8ebf4;box-shadow:0 3px 8px #14161a0a}
+.theme-chip.selected{background:#0f6f92;color:white;border-color:#0f6f92}
+.theme-chip.all-themes.selected{background:#85692a;border-color:#85692a}
+.theme-chip:focus-visible{outline:2px solid #0f6f92;outline-offset:3px}
+.theme-icon{display:flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;background:#0f6f9210;font-size:13px}
+.theme-chip.selected .theme-icon{background:#ffffff22}
+.theme-count{border-radius:12px;background:#14161a0b;padding:3px 7px;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+.theme-chip.selected .theme-count{background:#ffffff25}
+@media(max-width:600px){.theme-picker{padding:14px}.theme-picker-head{align-items:flex-start;flex-direction:column;gap:10px}.theme-chip{font-size:10px;padding:8px 10px}.theme-buttons{gap:7px}}
