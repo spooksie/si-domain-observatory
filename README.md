@@ -8,7 +8,7 @@ Branded with the QQuantum.ai repository's original wordmark and Bureau palette. 
 
 [Open the observatory](https://spooksie.github.io/si-domain-observatory/).
 
-The GitHub Pages version is served from `docs/`. It displays a dated registrar snapshot, including unavailable names. Available is the default. Choose one theme from the dropdown, or toggle the theme buttons to combine several categories. Each theme shows its available count; the count display can be switched off. All themes clears the category selection. Use Available / All names to switch availability views. Registrar links let you verify availability before checkout. Bought and saved flags, plus your added suggestions, stay in your browser's local storage; they are personal, and clearing browser data removes them. Download Markdown exports your current tracking flags. No account or database is needed.
+The GitHub Pages version is served from `docs/`. It displays a dated registrar snapshot, including unavailable names, and refreshes published updates every minute while the page is open. Available is the default. Choose one theme from the dropdown, or toggle the theme buttons to combine several categories. Each theme shows its available count; the count display can be switched off. All themes clears the category selection. Use Available / All names to switch availability views. Registrar links let you verify availability before checkout. Bought and saved flags, plus your added suggestions, stay in your browser's local storage; they are personal, and clearing browser data removes them. Download Markdown exports your current tracking flags. No account or database is needed.
 
 ## Local live viewer
 
