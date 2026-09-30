@@ -3,6 +3,9 @@ const $ = s => document.querySelector(s);
 let rows=[], filter='available',page=1,checking=false,stop=false;
 const perPage=60;
 const selectedThemes=new Set();
+const shortTheme='2–3 letter names';
+const isShortName=r=>/^[a-z]{2,3}$/.test(r.word);
+const inTheme=(r,c)=>c===shortTheme?isShortName(r):r.category===c;
 let themesInitialized=false;
 let initialCategory=new URLSearchParams(window.location.search).get('category')||'';
 if(initialCategory==='AI & intelligence')initialCategory='SI & super intelligence';
@@ -18,7 +21,7 @@ async function post(body){if(hosted){const state=personal();if(body.action==='sa
 async function load(){try{const r=await fetch(hosted?'domains.json':'api.php',{cache:'no-store'});if(!r.ok)throw new Error('Could not load domains');const data=await r.json();rows=hosted?data:data.domains;if(hosted){const state=personal();rows=rows.concat(state.added.filter(a=>!rows.some(r=>r.domain===a.domain))).map(r=>({...r,...state.flags[r.domain]}));}render();}catch(e){toast(e.message);}}
 function filtered(){let data=rows.filter(r=>{
  const q=$('#search').value.trim().toLowerCase();if(q&&!`${r.domain} ${r.idea||''} ${r.category}`.toLowerCase().includes(q))return false;
- if(selectedThemes.size&&!selectedThemes.has(r.category))return false;
+ if(selectedThemes.size&&![...selectedThemes].some(c=>inTheme(r,c)))return false;
  if($('#hide-bought').checked&&r.bought)return false;
  return filter==='all'||(filter==='ai'?r.ai&&r.status==='available':filter==='favorites'?r.favorite:filter==='bought'?r.bought:r.status===filter);
 });
@@ -33,11 +36,11 @@ function render(){
  const data=filtered();const pages=Math.max(1,Math.ceil(data.length/perPage));page=Math.min(page,pages);const start=(page-1)*perPage;$('#domains').innerHTML=data.slice(start,start+perPage).map(rowHTML).join('');$('#empty').hidden=!!data.length;$('#result-count').textContent=`${data.length.toLocaleString()} matching names${data.length?` · showing ${start+1}–${Math.min(start+perPage,data.length)}`:''}`;$('#page-label').textContent=`Page ${page} of ${pages}`;$('#prev').disabled=page<=1;$('#next').disabled=page>=pages;
 }
 function renderThemes(available){
- const categories=[...new Set(rows.map(r=>r.category))];
+ const categories=[...new Set(rows.flatMap(r=>isShortName(r)?[r.category,shortTheme]:[r.category]))];
  if(!themesInitialized){if(categories.includes(initialCategory))selectedThemes.add(initialCategory);themesInitialized=true;}
- const counts=new Map(categories.map(c=>[c,available.filter(r=>r.category===c).length]));
+ const counts=new Map(categories.map(c=>[c,available.filter(r=>inTheme(r,c)).length]));
  const showCounts=$('#show-theme-counts').checked;
- const icons={'SI & super intelligence':'✦','Science & space':'✧','Brandable dictionary words':'Aa','Build & infrastructure':'▦','Rare dictionary words':'◇','Modern service names':'⚡','Names & nicknames':'☺','Domain hacks':'↗','Your names':'★'};
+ const icons={'2–3 letter names':'↔','SI & super intelligence':'✦','Science & space':'✧','Brandable dictionary words':'Aa','Build & infrastructure':'▦','Rare dictionary words':'◇','Modern service names':'⚡','Names & nicknames':'☺','Domain hacks':'↗','Your names':'★'};
  $('#theme-buttons').innerHTML=`<button type="button" class="theme-chip all-themes ${selectedThemes.size?'':'selected'}" data-theme="" aria-pressed="${!selectedThemes.size}">All themes${showCounts?`<span class="theme-count">${available.length}</span>`:''}</button>`+categories.map(c=>`<button type="button" class="theme-chip ${selectedThemes.has(c)?'selected':''}" data-theme="${escape(c)}" aria-pressed="${selectedThemes.has(c)}"><span class="theme-icon" aria-hidden="true">${icons[c]||'◇'}</span>${escape(c)}${showCounts?`<span class="theme-count">${counts.get(c)}</span>`:''}</button>`).join('');
  $('#category').innerHTML='<option value="">All themes'+(showCounts?` · ${available.length} available`:'')+'</option>'+categories.map(c=>`<option value="${escape(c)}">${escape(c)}${showCounts?` · ${counts.get(c)} available`:''}</option>`).join('')+(selectedThemes.size>1?`<option value="__multiple">${selectedThemes.size} themes selected</option>`:'');
  $('#category').value=selectedThemes.size>1?'__multiple':([...selectedThemes][0]||'');
