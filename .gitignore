@@ -1,0 +1,7 @@
+data/*.lock
+/data/save-*
+md-*
+.DS_Store
+/data/
+/DOMAINS.md
+*.jpg
