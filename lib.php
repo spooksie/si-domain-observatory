@@ -20,7 +20,7 @@ function writeMarkdown(array $data): void {
     $sorted=$data; usort($sorted,fn($a,$b)=>[match($a['status']){'available'=>0,'unchecked','candidate'=>1,'unknown'=>2,default=>3},-($a['rank']??0),!($a['recommended']??false),$a['domain']]<=>[match($b['status']){'available'=>0,'unchecked','candidate'=>1,'unknown'=>2,default=>3},-($b['rank']??0),!($b['recommended']??false),$b['domain']]);
     foreach(['available'=>'Available at last check','unchecked'=>'Awaiting check','candidate'=>'Unregistered — registrar confirmation pending','unknown'=>'Could not confirm','taken'=>'Already registered or currently unavailable','reserved'=>'Reserved / unavailable'] as $status=>$title){
         $group=array_filter($sorted,fn($r)=>$r['status']===$status);if(!$group)continue;
-        $out.="## $title\n\n| Domain | Theme | AI fit | Name type | Idea | EUR incl. VAT | Checked (UTC) | Source | Bought | Registrar links |\n|---|---|---|---|---|---|---|---|---|---|\n";
+        $out.="## $title\n\n| Domain | Theme | SI fit | Name type | Idea | EUR incl. VAT | Checked (UTC) | Source | Bought | Registrar links |\n|---|---|---|---|---|---|---|---|---|---|\n";
         foreach($group as $r){$domain=$r['domain'];$price=isset($r['price_eur'])?number_format($r['price_eur'],2).' / '.($r['duration']??1).' year(s)':'—';$out.="| $domain | {$r['category']} | ".($r['ai']?'Yes':'General brand')." | ".($r['dictionary']??'Curated term')." | ".($r['idea']??'—')." | $price | ".($r['checked_at']??'—')." | ".($r['source']??'—')." | ".($r['bought']?'Yes':'No')." | [Neoserv](https://www.neoserv.si/domene?domena=$domain) · [Domenca](https://www.domenca.com/portal/en_US/shoppingcart-domainsearchengine/goal/domain/?initialDomain=$domain) |\n";}
         $out.="\n";
     }
