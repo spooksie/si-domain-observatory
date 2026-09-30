@@ -1,6 +1,6 @@
 'use strict';
 const $ = s => document.querySelector(s);
-let rows=[], filter='available',page=1,checking=false,stop=false;
+let rows=[], filter='all',page=1,checking=false,stop=false;
 const perPage=60;
 let initialCategory=new URLSearchParams(window.location.search).get('category')||'';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
