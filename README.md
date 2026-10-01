@@ -27,3 +27,7 @@ Each checked result includes the registrar source and UTC timestamp. Availabilit
 ## Two- and three-letter names
 
 The **2–3 letter names** theme includes every alphabetic domain label of that length in the catalogue, even when its original theme is a personal name or domain hack. Existing themes and personal flags are preserved. The new candidate search covers all 676 two-letter combinations and a curated set of three-letter letter combinations, vowel-led names, words and acronyms; it is not an exhaustive search of all 17,576 three-letter combinations. Letter count excludes `.si`. Availability comes from the same dated registrar checker.
+
+## Creative naming themes
+
+Eight additional filters explore product personality and purpose: Quiet intelligence, Agent crews, Memory & continuity, Seeing & sensing, Motion & momentum, Playful sound, Tiny utilities, and Crafted & tactile. Their candidates are coined or inspired by familiar words, with suggested product uses rather than claimed dictionary definitions. The reproducible candidate list lives in `candidates/creative-themes.json`; `scripts/add-creative.php` adds only new domains and preserves existing personal flags. `scripts/scan-creative.php` checks pending candidates through Domenca, records dated responses, and stops on rate limits or repeated inconclusive results. Use `--individual` to retry inconclusive names one at a time.

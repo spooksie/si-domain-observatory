@@ -1,0 +1,34 @@
+{
+  "Quiet intelligence": {
+    "idea": "A reassuring SI companion for focused work, reflection or a calmer daily routine.",
+    "words": "hushly hushio hushiq stillo stilliq easeo easeiq easevo softiq softio softva calmiq calmio calmva slowiq slowio slowva sereno seriva serenq mellowa mellio melliq lullio lulliq restiq restio pausio pausiq kindlyo"
+  },
+  "Agent crews": {
+    "idea": "A coordinated crew of SI agents that divides work, hands it over and gets it finished.",
+    "words": "crewiq crewio crewva hiveiq hiveio hiveva swarmi swarmio swarmiq podiq podio podva flockiq flockio flockva claniq clanio clanva allyiq allyio allyva teamiq teamio teamva duetio duetiq meshiq meshio meshva relayiq"
+  },
+  "Memory & continuity": {
+    "idea": "An SI memory layer that keeps context, reconnects ideas and remembers ongoing work.",
+    "words": "memiq memio memva memora memoriq recallo recalliq recallio threadiq threadio thredo thrediq keepsio keepsiq keepva notiq notio noteva jotiq jotio jotva echoiq echova echori loopiq loopio loopva traceiq traceio traceva"
+  },
+  "Seeing & sensing": {
+    "idea": "An SI service that observes signals, recognises patterns or helps you see what matters.",
+    "words": "glimpi glimpio glimpiq glintiq glintio glintva lensiq lensio lensva peepiq peepio peekva sightiq sightio sightva senseiq senseio senseva signiq signio signva prismo prismiq prismio lumiva lumiqo lumiro opticq optiva optiqo"
+  },
+  "Motion & momentum": {
+    "idea": "A proactive SI operator for moving a project forward, starting tasks and clearing friction.",
+    "words": "nudgi nudgio nudgiq nudgva glidi glidio glidiq glideva sprynt sprynto spryntiq driftio driftiq driftva sparkio sparkiq sparkva zipva zipio zipiq dashva dashio dashiq briskio briskiq briskva boostio boostiq boostva moviq"
+  },
+  "Playful sound": {
+    "idea": "A memorable spoken name for a friendly SI product; invented for its sound, without a claimed dictionary meaning.",
+    "words": "bimlo bimvo bimzi bomvi bomza bubvo bubzi pipvo pipza popzi popvo pebzi pebvo puflo pufzi wiblo wibzi wobvi wobza zublo zubzi zibvo zibza vumlo vumzi voplo vopzi nimvo nimzi nomvo"
+  },
+  "Tiny utilities": {
+    "idea": "A focused SI utility for one recognisable job: sorting, clipping, checking, stitching or trimming.",
+    "words": "sortiq sortio sortva clipiq clipio clipva trimio trimiq trimva stitchiq stitchio patchiq patchio patchva checkiq checkio checkva tidyiq tidyio tidyva fixva fixio fixiq syncva synciq syncio pingva pingiq pingio lintiq"
+  },
+  "Crafted & tactile": {
+    "idea": "An SI workshop brand inspired by making, weaving and assembling useful things.",
+    "words": "loomiq loomio loomva weavi weavio weaviq weavva knitio knitiq knitva spoolio spooliq spoolva clayiq clayio clayva kilnio kilniq kilnva chiselio chiseliq forgeva forgeiq forgeio grainiq grainio grainva feltio feltiq feltva"
+  }
+}
