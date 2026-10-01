@@ -26,6 +26,7 @@ for line in (root/'DOMAINS.md').read_text().splitlines():
   cells=line.split('|');cells[-3]=' No ';line='|'.join(cells)
  lines.append(line)
 (out/'DOMAINS.md').write_text('\n'.join(lines)+'\n')
+if (root/'CREATIVE-NAMING.md').exists():shutil.copyfile(root/'CREATIVE-NAMING.md',out/'CREATIVE-NAMING.md')
 for name in ['style.css','app.js']:shutil.copyfile(root/name,out/name)
 shutil.copytree(root/'assets',out/'assets',dirs_exist_ok=True)
 (out/'.nojekyll').write_text('')
