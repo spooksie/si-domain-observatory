@@ -60,5 +60,14 @@ $('#prev').onclick=()=>{page--;render();};$('#next').onclick=()=>{page++;render(
 $('#check-visible').onclick=()=>check(filtered().slice((page-1)*perPage,page*perPage).map(r=>r.domain));$('#stop-check').onclick=()=>{stop=true;};
 $('#add-toggle').onclick=()=>{$('#add-form').hidden=!$('#add-form').hidden;if(!$('#add-form').hidden)$('#new-name').focus();};
 $('#add-form').onsubmit=async e=>{e.preventDefault();try{const result=await post({action:'add',word:$('#new-name').value});$('#new-name').value='';await load();await check([result.domain]);}catch(e){toast(e.message);}};
-if(hosted){$('#check-visible').hidden=true;$('.download').addEventListener('click',e=>{e.preventDefault();const lines=['# QQuantum.ai domain shortlist','', '| Domain | Category | Availability | Checked UTC | Bought | Saved |','|---|---|---|---|---|---|',...rows.map(r=>`| ${r.domain} | ${r.category} | ${r.status} | ${r.checked_at||'Unchecked'} | ${r.bought?'Yes':'No'} | ${r.favorite?'Yes':'No'} |`)];const url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/markdown'}));const link=document.createElement('a');link.href=url;link.download='DOMAINS.md';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});}
+if(hosted)$('#check-visible').hidden=true;
+$('.download').addEventListener('click',e=>{
+ e.preventDefault();
+ const available=rows.filter(r=>r.status==='available');
+ if(!available.length){toast('No available domains to download. Wait for the catalogue to load or check names first.');return;}
+ const lines=['# QQuantum.ai — available .si domains','',`${available.length} domains available at their latest registrar check, across all themes.`,`Availability can change; check dates are recorded below.`, '', '| Domain | Category | Availability | Checked UTC | Bought | Saved |','|---|---|---|---|---|---|',...available.map(r=>`| ${r.domain} | ${r.category} | ${r.status} | ${r.checked_at||'Not recorded'} | ${r.bought?'Yes':'No'} | ${r.favorite?'Yes':'No'} |`)];
+ const url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/markdown'}));
+ const link=document.createElement('a');link.href=url;link.download='AVAILABLE-DOMAINS.md';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ toast(`Downloaded ${available.length.toLocaleString()} available domains.`);
+});
 load();setInterval(()=>{if(!checking&&!document.hidden)load();},hosted?60000:3000);
